@@ -11,7 +11,7 @@ module.exports = function(imports, modulable) {
 
   var app;
 
-  // module declaration
+  // App module declaration
   modulable.provides('app')
     /**
      * Initialize the app instance
@@ -78,5 +78,51 @@ module.exports = function(imports, modulable) {
     .method('use', function() {
       return app.use.apply(app, arguments);
     })
+    /**
+     * Attaching a rendering engine
+     */
+    .method('renderer', function(cb) {
+      app.engine('html', cb);
+      app.set('view engine', 'html');
+      app.set('views', app.config.root + '/template/' + app.config.template + '/');
+    })
   ;
+  
+  // Router module declaration
+  modulable.provides('router')
+    /**
+     * Initialize the router instance
+     */
+    .on('init', function() {
+      var self = this;
+      this.router = express.Router();
+      app.use(router);
+
+      // Assume "not found" in the error msgs is a 404
+      app.use(function(err, req, res, next) {
+          if (~err.message.indexOf('not found')) return next();
+          self.trigger('500', {
+            err: err, req: req, res: res, next: next
+          });
+      });
+  
+      // Assume 404 since no middleware responded
+      app.use(function(req, res, next) {
+          self.trigger('404', {
+            req: req, res: res, next: next
+          });
+      });
+    })
+    .method('all', function(pattern, cb) {
+      
+    })
+    .method('get', function(pattern, cb) {
+    })
+    .method('post', function(pattern, cb) {
+    })
+    .method('put', function(pattern, cb) {
+    })
+    .method('delete', function(pattern, cb) {
+    })
+  
 };

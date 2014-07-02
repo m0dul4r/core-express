@@ -33,7 +33,9 @@
   },
   "modulable": {
     "provides": {
-      "core": "app"
+      "core": [
+        "app", "router"
+      ]
     }
   }
 }
