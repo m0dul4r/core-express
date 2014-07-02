@@ -1,0 +1,39 @@
+{
+  "name": "mod-core-express",
+  "version": "0.0.1",
+  "description": "Modulable core module of Express lib (provides the app component)",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m0dul4r/core-express"
+  },
+  "keywords": [
+    "modulable",
+    "core",
+    "express",
+    "core.app"
+  ],
+  "author": "Ioan CHIRIAC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/m0dul4r/core-express/issues"
+  },
+  "homepage": "https://github.com/m0dul4r/core-express",
+  "dependencies": {
+    "express": "^4.0.0",
+    "connect-flash": "^0.1.1",
+    "view-helpers": "^0.1.4",
+    "compression": "^1.0.1",
+    "cookie-parser": "^1.0.1",
+    "body-parser": "^1.0.2",
+    "method-override": "^1.0.0"
+  },
+  "modulable": {
+    "provides": {
+      "core": "app"
+    }
+  }
+}
