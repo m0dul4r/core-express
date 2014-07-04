@@ -10,6 +10,7 @@ var express     = require('express');
 module.exports = function(imports) {
 
   var app;
+  var router;
 
   return {
     core: {
@@ -56,11 +57,6 @@ module.exports = function(imports) {
               }
             }
 
-            // set views path, template engine and default layout
-            app.engine('html', swig.renderFile);
-            app.set('view engine', 'html');
-            app.set('views', app.config.root + '/template/' + app.config.template + '/');
-
             // enable jsonp
             if (this.config.jsonp) {
               app.enable("jsonp callback");
@@ -73,9 +69,10 @@ module.exports = function(imports) {
           }
           
           ,start: function() {
-            app.listen(
-              process.env.PORT || this.config.port
-            );
+            if (process.env.PORT) {
+              this.config.port = process.env.PORT;
+            }
+            app.listen(this.config.port);
           }
         }
 
@@ -89,10 +86,21 @@ module.exports = function(imports) {
         /**
          * Attaching a rendering engine
          */
-        ,renderer: function(cb) {
+        ,renderer: function(cb, path, locate) {
           app.engine('html', cb);
           app.set('view engine', 'html');
-          app.set('views', app.config.root + '/template/' + app.config.template + '/');
+          app.set('views', path);
+          // manage multiple views levels (template & system defaults)
+          var expressLookup = app.get('view').prototype.lookup;
+          var customLookup = function(viewName) {
+            var match = locate.apply(this, [viewName]);
+            if (!match) {
+              this.root = path;
+              match = expressLookup.apply(this, [viewName]);
+            }
+            return match;
+          };
+          app.get('view').prototype.lookup = customLookup;
         }
       }
       // router service declaration
@@ -104,30 +112,47 @@ module.exports = function(imports) {
            */
           ready: function() {
             var self = this;
-            this.router = express.Router();
+            router = express.Router();
             app.use(router);
-
             // Assume "not found" in the error msgs is a 404
             app.use(function(err, req, res, next) {
-                if (~err.message.indexOf('not found')) return next();
-                self.trigger('500', {
-                  err: err, req: req, res: res, next: next
-                });
+              if (~err.message.indexOf('not found')) return next();
+              self.trigger('500', {
+                err: err, req: req, res: res, next: next
+              });
+              res.end();
             });
 
             // Assume 404 since no middleware responded
             app.use(function(req, res, next) {
-                self.trigger('404', {
-                  req: req, res: res, next: next
-                });
+              self.trigger('404', {
+                req: req, res: res, next: next
+              });
+              res.end();
             });
           }
         }
-        ,app: function(pattern, cb) { }
-        ,get: function(pattern, cb) { }
-        ,post: function(pattern, cb) { }
-        ,put: function(pattern, cb) { }
-        ,delete: function(pattern, cb) { }
+        // routing methods :
+        ,all: function(pattern, cb) {
+          router.route(pattern).all(cb);
+          return this;
+        }
+        ,get: function(pattern, cb) { 
+          router.route(pattern).get(cb);
+          return this;
+        }
+        ,post: function(pattern, cb) {
+          router.route(pattern).post(cb);
+          return this;
+        }
+        ,put: function(pattern, cb) {
+          router.route(pattern).put(cb);
+          return this;
+        }
+        ,delete: function(pattern, cb) {
+          router.route(pattern).delete(cb);
+          return this;
+        }
       }
     }
   };
