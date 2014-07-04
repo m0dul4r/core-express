@@ -31,11 +31,10 @@
     "body-parser": "^1.0.2",
     "method-override": "^1.0.0"
   },
-  "modulable": {
-    "provides": {
-      "core": [
-        "app", "router"
-      ]
-    }
+  "plugin": {
+    "provides": [
+      "core.app", 
+      "core.router"
+    ]
   }
 }
